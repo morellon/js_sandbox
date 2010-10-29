@@ -1,41 +1,46 @@
 <!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.01//EN" "http://www.w3.org/TR/html4/strict.dtd">
 <html lang="en"><head>
 
-    
-        <title>gRaphaël Line Charts</title>
-        <meta http-equiv="Content-Type" content="text/html; charset=UTF-8">
-        <meta name="author" content="Dmitry Baranovskiy">
-        <meta name="description" content="Charting JavaScript Library">
-        <link rel="stylesheet" href="linechart_files/demo.css" type="text/css" media="screen" charset="utf-8">
-        <script src="linechart_files/raphael.js" type="text/javascript" charset="utf-8"></script>
-        <script src="linechart_files/g_002.js" type="text/javascript" charset="utf-8"></script>
-        <script src="linechart_files/g.js" type="text/javascript" charset="utf-8"></script>
-		<script src="analytics_files/popup.js"></script>
-		<script src="linechart_files/chart.js" type="text/javascript" charset="utf-8"></script>
-        <script type="text/javascript" charset="utf-8">
-            window.onload = function () {
-				var lele = {"memory_internal_fre":[0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0],
-				"vif_0_tx":[0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0],
-				"vbd_xvdb_write":[0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0],
-				"memory":[0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0],
-				"vbd_xvda_write":[0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0],
-				"memory_target":[0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0],
-				"time":[1288281600,1288285200,1288288800,1288292400,1288296000,1288299600,1288303200,1288306800,1288310400,1288314000,1288317600,1288321200,1288324800,1288328400,1288332000,1288335600,1288339200, 1288342800,1288346400,1288350000,1288353600,1288357200,1288360800,1288364400,1288368000],
-				"vif_0_rx":[0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0],
-				"cpu0":[0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0],
-				"vbd_xvdb_read":[0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0],
-				"vbd_xvda_read":[0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0]}
-				
-                
-				bla = drawChart("holder", {
-					"title": "Memória do servidor XXX",
-					"legendTitle": "Legenda:",
-					"time": lele["time"],
-					"values": [lele["vif_0_tx"]],
-					"labels": ["Memória em uso", "Memória livre"]
-				});
-            };
-        </script>
-    </head><body>
-        <div id="holder"></div>
-    </body></html>
+
+	<title>gRaphaël Line Charts</title>
+	<meta http-equiv="Content-Type" content="text/html; charset=UTF-8">
+	<meta name="author" content="Dmitry Baranovskiy">
+	<meta name="description" content="Charting JavaScript Library">
+	<link rel="stylesheet" href="linechart_files/demo.css" type="text/css" media="screen" charset="utf-8">
+	<script src="linechart_files/raphael.js" type="text/javascript" charset="utf-8"></script>
+	<script src="linechart_files/g.raphael-min.js" type="text/javascript" charset="utf-8"></script>
+	<script src="linechart_files/g.line-min.js" type="text/javascript" charset="utf-8"></script>
+	<script src="linechart_files/popup.js" type="text/javascript" charset="utf-8"></script>
+	<script src="linechart_files/chart.js" type="text/javascript" charset="utf-8"></script>
+	<script type="text/javascript" charset="utf-8">
+	window.onload = function () {
+		var lele = {"memory_internal_fre":[0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0],
+		"vif_0_tx":[0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0],
+		"vbd_xvdb_write":[0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0],
+		"memory":[0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0],
+		"vbd_xvda_write":[0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0],
+		"memory_target":[0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0],
+		"time":[1288281600,1288285200,1288288800,1288292400,1288296000,1288299600,1288303200,
+			1288306800,1288310400,1288314000,1288317600,1288321200,1288324800,1288328400,1288332000,
+			1288335600,1288339200, 1288342800,1288346400,1288350000,1288353600,1288357200,1288360800,
+			1288364400,1288368000],
+		"vif_0_rx":[0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0],
+		"cpu0":[0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0],
+		"vbd_xvdb_read":[0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0],
+		"vbd_xvda_read":[0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0]}
+
+
+		bla = drawChart("holder", {
+			title: "Memória do servidor XXX",
+			legendTitle: "Legenda:",
+			time: lele["time"],
+			values: [lele["vif_0_tx"]],
+			labels: ["Memória em uso", "Memória livre"],
+			width: 680,
+			height: 400
+		});
+	};
+	</script>
+</head><body>
+	<div id="holder"></div>
+</body></html>
