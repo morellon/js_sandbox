@@ -1,0 +1,26 @@
+<!DOCTYPE HTML>
+<html lang="en"><head>
+
+    
+        <meta http-equiv="Content-Type" content="text/html; charset=UTF-8">
+        <title>Raphaël · Analytics</title>
+        <link rel="stylesheet" href="analytics_files/demo.css" type="text/css" media="screen">
+        <script src="analytics_files/raphael.js"></script>
+        <script src="analytics_files/popup.js"></script>
+        <script src="analytics_files/jquery.js"></script>
+        <script src="analytics_files/analytics.js"></script>
+		<script type="text/javascript" charset="utf-8">
+            window.onload = function () {
+                
+				bla = drawChart("holder", {
+					"title": "Memória do servidor XXX",
+					"legendTitle": "Legenda:",
+					"time": [1, 2, 3, 4, 5, 6, 7],
+					"values": [[12, 32, 23, 15, 17, 27, 22], [10, 20, 30, 25, 15, 28], [1, 2, 3, 2, 1, 28]],
+					"labels": ["Memória em uso", "Memória livre"]
+				});
+            };
+        </script>
+    </head><body>
+        <div id="holder"></div>
+    </body></html>
