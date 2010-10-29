@@ -17,7 +17,7 @@ function manipulateAxis(axis, transform) {
 	}
 }
 
-function setSymbolCallbacks(raphael, chart, time, values) {
+function setSymbolCallbacks(raphael, chart, time, values, units) {
 	for (var i=0; i < chart.symbols.length; i++ ) {
 		for (var j=0; j < chart.symbols[i].length; j++ ) {
 			(function(graphIndex, valueIndex) {
@@ -27,7 +27,7 @@ function setSymbolCallbacks(raphael, chart, time, values) {
 						color = this.attrs.fill;
 
 						var label = raphael.set();
-						label.push(raphael.text(60, 12, values[graphIndex][valueIndex] + " hits").attr({font: '12px Helvetica, Arial', fill: "#fff"}));
+						label.push(raphael.text(60, 12, values[graphIndex][valueIndex] + " " + units[graphIndex]).attr({font: '12px Helvetica, Arial', fill: "#fff"}));
 						date = new Date(time[valueIndex] * 1000)
 					    label.push(raphael.text(60, 27, date).attr({font: '10px Helvetica, Arial', fill: "#fff"}));
 						this.label = label;
@@ -53,13 +53,14 @@ function drawChart(holder, opts) {
 	var height = opts.height;
 	var time = opts.time;
 	var values = opts.values;
+	var units = opts.units;
 	
-	r.g.text(100, 20, opts.title);
+	r.g.text((width+20)/2, 20, opts.title);
 
     var chart = r.g.linechart(20, 20, width, height, time, values, {shade: true, nostroke: false, axis: "0 0 1 1", symbol: "o", smooth: true});
     chart.symbols.attr({r: 4});
 
-	setSymbolCallbacks(r, chart, time, values);
+	setSymbolCallbacks(r, chart, time, values, units);
 	
 	manipulateAxis(chart.axis[0], function (text) {
 		date = new Date(parseInt(text) * 1000);
