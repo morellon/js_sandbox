@@ -51,7 +51,7 @@ function drawChart(holder, opts) {
 
 	var width = opts.width;
 	var height = opts.height;
-	var time = opts.time
+	var time = opts.time;
 	var values = opts.values;
 	
 	r.g.text(100, 20, opts.title);
