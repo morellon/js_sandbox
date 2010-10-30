@@ -4,8 +4,20 @@ function drawLegend(raphael, x, y, opts) {
 	for(var i=0; i < lines.length; i++) {
 		color = lines[i].attrs.stroke;
 		label_y = y + 15 * (i+2);
-		raphael.circle(x + 20, label_y, 5).attr({"stroke": color, "fill": color});
-		raphael.g.text(x + 30, label_y, opts.labels[i]).attr({"text-anchor": "start"});
+		lineLegend = raphael.set();
+		lineLegend.push(raphael.circle(x + 20, label_y, 5).attr({"stroke": color, "fill": color}));
+		lineLegend.push(raphael.g.text(x + 30, label_y, opts.labels[i]).attr({"text-anchor": "start"}));
+		(function(graphIndex) {
+			var line = lines[i];
+			lineLegend.hover(
+				function () {
+					line.attr({"stroke-width": 4});
+				},
+				function () {
+					line.attr({"stroke-width": 2});
+				}
+			);
+		})(i);
 	}
 	raphael.rect(x, y, 300, 15 * (lines.length + 2) );
 }
