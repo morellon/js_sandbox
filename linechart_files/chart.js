@@ -11,17 +11,20 @@ function drawLegend(x, y, opts) {
 	var lines = opts.chart.lines;
 	var raphael = lines[0].paper;
 	
+	var legend = raphael.set();
+	
 	if (opts.title)
-		raphael.g.text(x+15 , y+15, opts.title).attr({"text-anchor": "start"});
+		legend.push(raphael.g.text(x+15 , y+15, opts.title).attr({"text-anchor": "start"}));
+	
 	for(var i=0; i < lines.length; i++) {
 		var color = lines[i].attrs.stroke;
 		var label_y = y + 15 * (i+2);
-		var lineLegend = raphael.set();
-		lineLegend.push(raphael.circle(x + 20, label_y, 5).attr({"stroke": color, "fill": color}));
-		lineLegend.push(raphael.g.text(x + 30, label_y, opts.labels[i]).attr({"text-anchor": "start"}));
+		var legendItem = raphael.set();
+		legendItem.push(raphael.circle(x + 20, label_y, 5).attr({"stroke": color, "fill": color}));
+		legendItem.push(raphael.g.text(x + 30, label_y, opts.labels[i]).attr({"text-anchor": "start"}));
 		(function(graphIndex) {
 			var line = lines[graphIndex];
-			lineLegend.hover(
+			legendItem.hover(
 				function () {
 					line.attr({"stroke-width": 4});
 				},
@@ -30,8 +33,13 @@ function drawLegend(x, y, opts) {
 				}
 			);
 		})(i);
+		
+		legend.push(legendItem);
 	}
-	raphael.rect(x, y, 300, 15 * (lines.length + 2) );
+	
+	legend.push(raphael.rect(x, y, 300, 15 * (lines.length + 2) ));
+	
+	return legend;
 }
 
 function overwriteAxis(axis, transform) {
@@ -48,7 +56,10 @@ function setSymbolCallbacks(chart, time, values, units) {
 	for (var i=0; i < chart.symbols.length; i++ ) {
 		for (var j=0; j < chart.symbols[i].length; j++ ) {
 			(function(graphIndex, valueIndex) {
-				chart.symbols[graphIndex][valueIndex].hover(
+				var symbol = chart.symbols[graphIndex][valueIndex];
+				chart.columns.push(symbol.paper.rect(symbol.attrs.cx-10,25,20,385).attr({fill: "#fff", "opacity": 0}));
+				symbol.toFront();
+				symbol.hover(
 					function () {
 						var color = this.attrs.fill;
 						var raphael = this.paper;
@@ -90,9 +101,10 @@ function drawChart(holder, opts) {
 	
 	if (opts.title)
 		r.g.text((width+20)/2, 20, opts.title);
-	var chart = r.g.linechart(20, 20, width, height, time, values, {shade: true, nostroke: false, axis: "0 0 1 1", symbol: "o", smooth: true});
+	var chart = r.g.linechart(30, 20, width, height, time, values, {shade: true, nostroke: false, axis: "0 0 10 10", symbol: "o", smooth: true});
   chart.symbols.attr({r: 4});
-
+	chart.columns = r.set();
+	
 	for (var i=chartsNumber; i < values.length; i++) {
 		chart.lines[i].remove();
 		chart.lines.pop(i);
@@ -104,9 +116,37 @@ function drawChart(holder, opts) {
 
 	setSymbolCallbacks(chart, time, values, units);
 	
+	var selection;
+	chart.columns.hover(function () {
+		this.attr("opacity", 0.5);
+	}, function () {
+		this.attr("opacity", 0);
+	}).mousedown(function () {
+		if (!selection) {
+			selection = this.paper.rect(this.attrs.x, this.attrs.y, this.attrs.width, this.attrs.height).attr({stroke: "#404", fill: "#c0c", opacity: 0.3});
+			selection.toBack();
+			selection.firstColumn = this;			
+		}
+	}).mouseover(function () {
+		if (selection) {
+			var width = this.attrs.x - selection.firstColumn.attrs.x;
+			if (width >= 0)
+				selection.attr({x: selection.firstColumn.attrs.x, width: width});
+			else
+				selection.attr({x: this.attrs.x, width: -width});
+			console.log(selection);
+		}
+	}).mouseup(function () {
+		if (selection) {
+			selection.remove();
+			selection = false;
+			console.log("done")
+		}
+	});
+	
 	overwriteAxis(chart.axis[0]);
 	
-	drawLegend(15, height + 45, {chart: chart, labels: opts.labels, title: opts.legendTitle});
+	chart.legend = drawLegend(15, height + 45, {chart: chart, labels: opts.labels, title: opts.legendTitle});
 	
 	return chart;
 }
