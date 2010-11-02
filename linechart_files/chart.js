@@ -42,6 +42,49 @@ function drawLegend(x, y, opts) {
 	return legend;
 }
 
+function defineColumns(x, y, width, height, chart) {
+	var raphael = chart.lines[0].paper;
+	
+	var columns = raphael.set();
+	
+	for (var i=x; i < width + x;i++) {
+		var col = raphael.rect(i,y,1,height).attr({fill: "#fff", "opacity": 0});
+		columns.push(col);
+	}
+	
+	return columns;
+}
+
+function defineSelection(chart) {
+	var selection;
+	chart.columns.hover(function () {
+		this.attr("opacity", 0.5);
+	}, function () {
+		this.attr("opacity", 0);
+	}).mousedown(function () {
+		if (!selection) {
+			selection = this.paper.rect(this.attrs.x, this.attrs.y, this.attrs.width, this.attrs.height).attr({stroke: "#404", fill: "#c0c", opacity: 0.3});
+			selection.toBack();
+			selection.firstColumn = this;			
+		}
+	}).mouseover(function () {
+		if (selection) {
+			var width = this.attrs.x - selection.firstColumn.attrs.x;
+			if (width >= 0)
+				selection.attr({x: selection.firstColumn.attrs.x, width: width});
+			else
+				selection.attr({x: this.attrs.x, width: -width});
+			console.log(selection);
+		}
+	}).mouseup(function () {
+		if (selection) {
+			selection.remove();
+			selection = false;
+			console.log("done")
+		}
+	});
+}
+
 function overwriteAxis(axis, transform) {
 	var texts = axis.text;
 	for(var i=0; i < texts.length; i++) {
@@ -57,7 +100,6 @@ function setSymbolCallbacks(chart, time, values, units) {
 		for (var j=0; j < chart.symbols[i].length; j++ ) {
 			(function(graphIndex, valueIndex) {
 				var symbol = chart.symbols[graphIndex][valueIndex];
-				chart.columns.push(symbol.paper.rect(symbol.attrs.cx-10,25,20,385).attr({fill: "#fff", "opacity": 0}));
 				symbol.toFront();
 				symbol.hover(
 					function () {
@@ -113,36 +155,12 @@ function drawChart(holder, opts) {
 		chart.symbols[i].remove();
 		chart.symbols.pop(i);
 	}
+	
+	chart.columns = defineColumns(30, 25, width, height, chart);
 
 	setSymbolCallbacks(chart, time, values, units);
-	
-	var selection;
-	chart.columns.hover(function () {
-		this.attr("opacity", 0.5);
-	}, function () {
-		this.attr("opacity", 0);
-	}).mousedown(function () {
-		if (!selection) {
-			selection = this.paper.rect(this.attrs.x, this.attrs.y, this.attrs.width, this.attrs.height).attr({stroke: "#404", fill: "#c0c", opacity: 0.3});
-			selection.toBack();
-			selection.firstColumn = this;			
-		}
-	}).mouseover(function () {
-		if (selection) {
-			var width = this.attrs.x - selection.firstColumn.attrs.x;
-			if (width >= 0)
-				selection.attr({x: selection.firstColumn.attrs.x, width: width});
-			else
-				selection.attr({x: this.attrs.x, width: -width});
-			console.log(selection);
-		}
-	}).mouseup(function () {
-		if (selection) {
-			selection.remove();
-			selection = false;
-			console.log("done")
-		}
-	});
+
+	defineSelection(chart);
 	
 	overwriteAxis(chart.axis[0]);
 	
