@@ -42,47 +42,49 @@ function drawLegend(x, y, opts) {
 	return legend;
 }
 
-function defineColumns(x, y, opts) {
+function defineChartArea(x, y, opts) {
 	var width = opts.width;
 	var height = opts.height;
 	var chart = opts.chart;
 	var raphael = chart.lines[0].paper;
 	
-	var columns = raphael.set();
-	var xStep = (chart.xValues[chart.xValues.length-1] - chart.xValues[0])/width;
-	
-	for (var i=0; i < width; i++) {
-		var col = raphael.rect(i+x,y,1,height).attr({fill: "#fff", "opacity": 0});
-		col.value = (xStep * i) + chart.xValues[0];
-		columns.push(col);
-	}
-	
-	columns.hover(function () {
-		this.attr("opacity", 0.5);
-	}, function () {
-		this.attr("opacity", 0);
+	var column = raphael.rect(0,y,1,height).attr({fill: "#fff", "opacity": 0});
+	var chartArea = raphael.rect(x,y,width,height).attr({fill: "#fff", "opacity": 0});
+	chartArea.mousemove(function (e) {
+		column.attr({opacity: 0.5, x: e.offsetX});
+	});
+	chartArea.mouseout(function (e) {
+		column.attr({opacity: 0});
 	});
 	
-	columns.onSelection = function (f) {
+	chartArea.selection = function (f) {
 		var selection;
-		columns.mousedown(function () {
+		chartArea.mousedown(function () {
 			if (!selection) {
-				selection = this.paper.rect(this.attrs.x, this.attrs.y, this.attrs.width, this.attrs.height).attr({stroke: "#404", fill: "#c0c", opacity: 0.3});
+				selection = this.paper.rect(column.attrs.x, column.attrs.y, column.attrs.width, column.attrs.height).attr({stroke: "#404", fill: "#c0c", opacity: 0.3});
 				// if selection rectangle is in front, the events won't work
 				selection.toBack();
-				selection.firstColumn = this;	
+				selection.startValue = function () {
+					var xStep = (chart.xValues[chart.xValues.length-1] - chart.xValues[0])/width;
+					return ((this.start-x) * xStep) + chart.xValues[0];
+				}
+				selection.endValue = function () {
+					var xStep = (chart.xValues[chart.xValues.length-1] - chart.xValues[0])/width;
+					return ((this.end-x) * xStep) + chart.xValues[0];
+				}
+				selection.start = column.attrs.x;	
 			}
-		}).mouseover(function () {
+		}).mousemove(function (e) {
 			if (selection) {
-				var width = this.attrs.x - selection.firstColumn.attrs.x;
+				var width = column.attrs.x - selection.start;
 				if (width >= 0)
-					selection.attr({x: selection.firstColumn.attrs.x, width: width});
+					selection.attr({x: selection.start, width: width});
 				else
-					selection.attr({x: this.attrs.x, width: -width});
+					selection.attr({x: column.attrs.x, width: -width});
 			}
 		}).mouseup(function () {
 			if (selection) {
-				selection.lastColumn = this;
+				selection.end = column.attrs.x;
 				f && f(selection);
 				selection.remove();
 				selection = undefined;
@@ -90,7 +92,7 @@ function defineColumns(x, y, opts) {
 		});
 	}
 	
-	return columns;
+	return chartArea;
 }
 
 function overwriteAxis(axis, transform) {
@@ -169,8 +171,8 @@ function drawChart(holder, opts) {
 		chart.symbols.pop(i);
 	}
 	
-	chart.columns = defineColumns(paddingLeft, paddingTop, {width: width, height: height, chart: chart});
-	chart.columns.onSelection(function (sel) {console.log(Date.formatted_time(sel.lastColumn.value))});
+	chartArea = defineChartArea(paddingLeft, paddingTop, {width: width, height: height, chart: chart})
+	chartArea.selection(function (sel) {console.log(Date.formatted_time(sel.endValue()))});
 
 	setSymbolCallbacks(chart, time, values, units);
 	
