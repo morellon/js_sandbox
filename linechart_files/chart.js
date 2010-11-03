@@ -52,37 +52,38 @@ function defineColumns(x, y, width, height, chart) {
 		columns.push(col);
 	}
 	
+	columns.onSelection = function (f) {
+		var selection;
+		columns.hover(function () {
+			this.attr("opacity", 0.5);
+		}, function () {
+			this.attr("opacity", 0);
+		}).mousedown(function () {
+			if (!selection) {
+				selection = this.paper.rect(this.attrs.x, this.attrs.y, this.attrs.width, this.attrs.height).attr({stroke: "#404", fill: "#c0c", opacity: 0.3});
+				// if selection rectangle is in front, the events won't work
+				selection.toBack();
+				selection.firstColumn = this;	
+			}
+		}).mouseover(function () {
+			if (selection) {
+				var width = this.attrs.x - selection.firstColumn.attrs.x;
+				if (width >= 0)
+					selection.attr({x: selection.firstColumn.attrs.x, width: width});
+				else
+					selection.attr({x: this.attrs.x, width: -width});
+			}
+		}).mouseup(function () {
+			if (selection) {
+				selection.lastColumn = this;
+				f && f(selection);
+				selection.remove();
+				selection = undefined;
+			}
+		});
+	}
+	
 	return columns;
-}
-
-function defineSelection(chart) {
-	var selection;
-	chart.columns.hover(function () {
-		this.attr("opacity", 0.5);
-	}, function () {
-		this.attr("opacity", 0);
-	}).mousedown(function () {
-		if (!selection) {
-			selection = this.paper.rect(this.attrs.x, this.attrs.y, this.attrs.width, this.attrs.height).attr({stroke: "#404", fill: "#c0c", opacity: 0.3});
-			selection.toBack();
-			selection.firstColumn = this;			
-		}
-	}).mouseover(function () {
-		if (selection) {
-			var width = this.attrs.x - selection.firstColumn.attrs.x;
-			if (width >= 0)
-				selection.attr({x: selection.firstColumn.attrs.x, width: width});
-			else
-				selection.attr({x: this.attrs.x, width: -width});
-			console.log(selection);
-		}
-	}).mouseup(function () {
-		if (selection) {
-			selection.remove();
-			selection = false;
-			console.log("done")
-		}
-	});
 }
 
 function overwriteAxis(axis, transform) {
@@ -145,8 +146,11 @@ function drawChart(holder, opts) {
 		r.g.text((width+20)/2, 20, opts.title);
 	var chart = r.g.linechart(30, 20, width, height, time, values, {shade: true, nostroke: false, axis: "0 0 10 10", symbol: "o", smooth: true});
   chart.symbols.attr({r: 4});
-	chart.columns = r.set();
 	
+	chart.xValues = time;
+	chart.yValues = values;
+	
+	// remove highValue and lowValue graphics
 	for (var i=chartsNumber; i < values.length; i++) {
 		chart.lines[i].remove();
 		chart.lines.pop(i);
@@ -156,11 +160,11 @@ function drawChart(holder, opts) {
 		chart.symbols.pop(i);
 	}
 	
-	chart.columns = defineColumns(30, 25, width, height, chart);
+	chart.columns = defineColumns(30, 20, width, height, chart);
+	
+	chart.columns.onSelection(function (sel) {console.log(sel.lastColumn)});
 
 	setSymbolCallbacks(chart, time, values, units);
-
-	defineSelection(chart);
 	
 	overwriteAxis(chart.axis[0]);
 	
