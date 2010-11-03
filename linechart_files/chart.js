@@ -73,6 +73,8 @@ function defineChartArea(x, y, opts) {
 					var xStep = (chart.xValues[chart.xValues.length-1] - chart.xValues[0])/width;
 					return ((this.attrs.x-x+this.attrs.width) * xStep) + chart.xValues[0];
 				}
+				
+				selection.start = column.attrs.x;	
 			}
 		}).mousemove(function (e) {
 			if (selection) {
