@@ -96,12 +96,6 @@ function defineChartArea(x, y, opts) {
 				selection.remove();
 				selection = undefined;
 			}
-		}).mouseout(function() {
-			if (selection) {
-				f && f(selection);
-				selection.remove();
-				selection = undefined;
-			}
 		});
 	}
 	
@@ -191,14 +185,16 @@ function drawChart(holder, opts) {
 		chart.symbols.pop(i);
 	}
 	
-	chartArea = defineChartArea(paddingLeft, paddingTop, {width: width, height: height, chart: chart})
-	chartArea.selection(function (sel) {console.log(Date.formatted_time(sel.endValue()))});
+	chart.area = defineChartArea(paddingLeft, paddingTop, {width: width, height: height, chart: chart});
+	chart.push(chart.area);
+	chart.area.selection(function (sel) {console.log(Date.formatted_time(sel.endValue()))});
 
 	setSymbolCallbacks(chart, time, values, units);
 	
 	overwriteAxis(chart.axis[0]);
 	
 	chart.legend = drawLegend(15, height + 45, {chart: chart, labels: opts.labels, title: opts.legendTitle});
+	chart.push(chart.legend);
 	
 	return chart;
 }
