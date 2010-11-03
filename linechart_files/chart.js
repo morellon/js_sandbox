@@ -42,23 +42,30 @@ function drawLegend(x, y, opts) {
 	return legend;
 }
 
-function defineColumns(x, y, width, height, chart) {
+function defineColumns(x, y, opts) {
+	var width = opts.width;
+	var height = opts.height;
+	var chart = opts.chart;
 	var raphael = chart.lines[0].paper;
 	
 	var columns = raphael.set();
+	var xStep = (chart.xValues[chart.xValues.length-1] - chart.xValues[0])/width;
 	
-	for (var i=x; i < width + x;i++) {
-		var col = raphael.rect(i,y,1,height).attr({fill: "#fff", "opacity": 0});
+	for (var i=0; i < width; i++) {
+		var col = raphael.rect(i+x,y,1,height).attr({fill: "#fff", "opacity": 0});
+		col.value = (xStep * i) + chart.xValues[0];
 		columns.push(col);
 	}
 	
+	columns.hover(function () {
+		this.attr("opacity", 0.5);
+	}, function () {
+		this.attr("opacity", 0);
+	});
+	
 	columns.onSelection = function (f) {
 		var selection;
-		columns.hover(function () {
-			this.attr("opacity", 0.5);
-		}, function () {
-			this.attr("opacity", 0);
-		}).mousedown(function () {
+		columns.mousedown(function () {
 			if (!selection) {
 				selection = this.paper.rect(this.attrs.x, this.attrs.y, this.attrs.width, this.attrs.height).attr({stroke: "#404", fill: "#c0c", opacity: 0.3});
 				// if selection rectangle is in front, the events won't work
@@ -131,6 +138,8 @@ function drawChart(holder, opts) {
 
 	var width = opts.width || 600;
 	var height = opts.height || 200;
+	var paddingTop = 20;
+	var paddingLeft = 30;
 	var time = opts.time;
 	var values = opts.values;
 	var units = opts.units;
@@ -143,8 +152,8 @@ function drawChart(holder, opts) {
 		values.push([opts.lowValue]);
 	
 	if (opts.title)
-		r.g.text((width+20)/2, 20, opts.title);
-	var chart = r.g.linechart(30, 20, width, height, time, values, {shade: true, nostroke: false, axis: "0 0 10 10", symbol: "o", smooth: true});
+		r.g.text((width+paddingLeft)/2, paddingTop, opts.title);
+	var chart = r.g.linechart(paddingLeft, paddingTop, width, height, time, values, {shade: true, nostroke: false, axis: "0 0 1 1", symbol: "o", smooth: true});
   chart.symbols.attr({r: 4});
 	
 	chart.xValues = time;
@@ -160,9 +169,8 @@ function drawChart(holder, opts) {
 		chart.symbols.pop(i);
 	}
 	
-	chart.columns = defineColumns(30, 20, width, height, chart);
-	
-	chart.columns.onSelection(function (sel) {console.log(sel.lastColumn)});
+	chart.columns = defineColumns(paddingLeft, paddingTop, {width: width, height: height, chart: chart});
+	chart.columns.onSelection(function (sel) {console.log(Date.formatted_time(sel.lastColumn.value))});
 
 	setSymbolCallbacks(chart, time, values, units);
 	
