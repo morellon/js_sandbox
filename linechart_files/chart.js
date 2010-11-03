@@ -47,15 +47,13 @@ function defineChartArea(x, y, opts) {
 	var width = opts.width;
 	var height = opts.height;
 	var chart = opts.chart;
+	var div = chart.div;
 	var raphael = chart.lines[0].paper;
 	
 	var column = raphael.rect(0, y, 1, height).attr({fill: "#fff", "opacity": 0});
 	var chartArea = raphael.rect(x, y, width, height).attr({fill: "#fff", "opacity": 0});
 	chartArea.mousemove(function (e) {
-		console.log(e);
-		console.log(this);
-		console.log($('#memory-graphics'));
-		column.attr({opacity: 0.5, x: e.offsetX || (e.pageX - 373)});
+		column.attr({opacity: 0.5, x: e.offsetX || (e.pageX - div.offsetLeft)});
 	});
 	chartArea.mouseout(function () {
 		column.attr({opacity: 0, x: 0});
@@ -178,6 +176,7 @@ function drawChart(holder, opts) {
 	
 	chart = r.g.linechart(paddingLeft, paddingTop, width, height, time, values, {shade: true, nostroke: false, axis: "0 0 1 1", symbol: "o", smooth: true});
 	chart.symbols.attr({r: 4});
+	chart.div = $("#" + holder)[0]
 	
 	chart.xValues = time;
 	chart.yValues = values;
