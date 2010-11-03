@@ -51,10 +51,10 @@ function defineChartArea(x, y, opts) {
 	var column = raphael.rect(0,y,1,height).attr({fill: "#fff", "opacity": 0});
 	var chartArea = raphael.rect(x,y,width,height).attr({fill: "#fff", "opacity": 0});
 	chartArea.mousemove(function (e) {
-		column.attr({opacity: 0.5, x: e.offsetX});
+		column.attr({opacity: 0.5, x: e.offsetX || (e.pageX - 373)});
 	});
-	chartArea.mouseout(function (e) {
-		column.attr({opacity: 0});
+	chartArea.mouseout(function () {
+		column.attr({opacity: 0, x: 0});
 	});
 	
 	chartArea.selection = function (f) {
@@ -64,15 +64,15 @@ function defineChartArea(x, y, opts) {
 				selection = this.paper.rect(column.attrs.x, column.attrs.y, column.attrs.width, column.attrs.height).attr({stroke: "#404", fill: "#c0c", opacity: 0.3});
 				// if selection rectangle is in front, the events won't work
 				selection.toBack();
+				
 				selection.startValue = function () {
 					var xStep = (chart.xValues[chart.xValues.length-1] - chart.xValues[0])/width;
-					return ((this.start-x) * xStep) + chart.xValues[0];
+					return ((this.attrs.x-x) * xStep) + chart.xValues[0];
 				}
 				selection.endValue = function () {
 					var xStep = (chart.xValues[chart.xValues.length-1] - chart.xValues[0])/width;
-					return ((this.end-x) * xStep) + chart.xValues[0];
+					return ((this.attrs.x-x+this.attrs.width) * xStep) + chart.xValues[0];
 				}
-				selection.start = column.attrs.x;	
 			}
 		}).mousemove(function (e) {
 			if (selection) {
@@ -84,7 +84,12 @@ function defineChartArea(x, y, opts) {
 			}
 		}).mouseup(function () {
 			if (selection) {
-				selection.end = column.attrs.x;
+				f && f(selection);
+				selection.remove();
+				selection = undefined;
+			}
+		}).mouseout(function () {
+			if (selection) {
 				f && f(selection);
 				selection.remove();
 				selection = undefined;
@@ -156,7 +161,7 @@ function drawChart(holder, opts) {
 	if (opts.title)
 		r.g.text((width+paddingLeft)/2, paddingTop, opts.title);
 	var chart = r.g.linechart(paddingLeft, paddingTop, width, height, time, values, {shade: true, nostroke: false, axis: "0 0 1 1", symbol: "o", smooth: true});
-  chart.symbols.attr({r: 4});
+	chart.symbols.attr({r: 4});
 	
 	chart.xValues = time;
 	chart.yValues = values;
