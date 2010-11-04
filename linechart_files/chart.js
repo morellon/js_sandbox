@@ -158,18 +158,20 @@ Raphael.fn.g.extendedlinechart = function(opts) {
 		time = opts.time,
 		values = opts.values,
 		units = opts.units,
-		chartsNumber = values.length,
+		graphValues = [],
 		chart;
 		
+	graphValues = graphValues.concat(values);
+		
 	if (typeof(opts.highValue) != "undefined") {
-		values.push([opts.highValue]);
+		graphValues.push([opts.highValue]);
 	}
 	
 	if (typeof(opts.lowValue) != "undefined") {
-		values.push([opts.lowValue]);
+		graphValues.push([opts.lowValue]);
 	}
 	
-	chart = this.g.linechart(paddingLeft, paddingTop, width, height, time, values, {shade: true, nostroke: false, axis: "0 0 1 1", symbol: "o", smooth: true});
+	chart = this.g.linechart(paddingLeft, paddingTop, width, height, time, graphValues, {shade: true, nostroke: false, axis: "0 0 1 1", symbol: "o", smooth: true});
 	chart.symbols.attr({r: 4});
 	chart.div = this.canvas.parentNode;
 	
@@ -183,7 +185,7 @@ Raphael.fn.g.extendedlinechart = function(opts) {
 	}
 	
 	// remove highValue and lowValue graphics
-	for (var i = chartsNumber; i < values.length; i++) {
+	for (var i = values.length; i < graphValues.length; i++) {
 		chart.lines[i].remove();
 		chart.lines.pop(i);
 		chart.shades[i].remove();
