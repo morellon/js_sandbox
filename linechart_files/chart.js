@@ -8,22 +8,23 @@ Date.formatted_time = function (text) {
 }
 
 Raphael.fn.g.extendedlinechart = function(opts) {
+	var that = this;
+	
 	function drawLegend(x, y, opts) {
 		var chart = opts.chart,
 				lines = opts.chart.lines,
-				raphael = lines[0].paper,
-				legend = raphael.set();
+				legend = that.set();
 
 		if (opts.title) {
-			legend.push(raphael.g.text(x + 15 , y + 15, opts.title).attr({"text-anchor": "start"}));
+			legend.push(that.g.text(x + 15 , y + 15, opts.title).attr({"text-anchor": "start"}));
 		}
 
 		for(var i = 0; i < lines.length; i++) {
 			var color = lines[i].attrs.stroke;
 			var label_y = y + 15 * (i+2);
-			var legendItem = raphael.set();
-			legendItem.push(raphael.circle(x + 20, label_y, 5).attr({"stroke": color, "fill": color}));
-			legendItem.push(raphael.g.text(x + 30, label_y, opts.labels[i]).attr({"text-anchor": "start"}));
+			var legendItem = that.set();
+			legendItem.push(that.circle(x + 20, label_y, 5).attr({"stroke": color, "fill": color}));
+			legendItem.push(that.g.text(x + 30, label_y, opts.labels[i]).attr({"text-anchor": "start"}));
 			(function(graphIndex) {
 				var line = lines[graphIndex];
 				legendItem.hover(
@@ -39,7 +40,7 @@ Raphael.fn.g.extendedlinechart = function(opts) {
 			legend.push(legendItem);
 		}
 
-		legend.push(raphael.rect(x, y, 300, 15 * (lines.length + 2)));
+		legend.push(that.rect(x, y, 300, 15 * (lines.length + 2)));
 		chart.legend = legend;
 		chart.push(legend);
 
@@ -51,10 +52,9 @@ Raphael.fn.g.extendedlinechart = function(opts) {
 		var height = opts.height;
 		var chart = opts.chart;
 		var div = chart.div;
-		var raphael = chart.lines[0].paper;
 
-		var column = raphael.rect(0, y, 1, height).attr({fill: "#fff", "opacity": 0});
-		var chartArea = raphael.rect(x, y, width, height).attr({fill: "#fff", "opacity": 0});
+		var column = that.rect(0, y, 1, height).attr({fill: "#fff", "opacity": 0});
+		var chartArea = that.rect(x, y, width, height).attr({fill: "#fff", "opacity": 0});
 		chart.columnX = column;
 		chart.area = chartArea;
 		chart.push(chartArea, column);
@@ -149,8 +149,7 @@ Raphael.fn.g.extendedlinechart = function(opts) {
 		}
 	}
 	
-	var r = this;
-	r.g.txtattr.font = "12px 'Fontin Sans', Fontin-Sans, sans-serif";
+	this.g.txtattr.font = "12px 'Fontin Sans', Fontin-Sans, sans-serif";
 
 	var width = opts.width || 600,
 		height = opts.height || 200,
@@ -170,15 +169,15 @@ Raphael.fn.g.extendedlinechart = function(opts) {
 		values.push([opts.lowValue]);
 	}
 	
-	chart = r.g.linechart(paddingLeft, paddingTop, width, height, time, values, {shade: true, nostroke: false, axis: "0 0 1 1", symbol: "o", smooth: true});
+	chart = this.g.linechart(paddingLeft, paddingTop, width, height, time, values, {shade: true, nostroke: false, axis: "0 0 1 1", symbol: "o", smooth: true});
 	chart.symbols.attr({r: 4});
-	chart.div = r.canvas.parentNode;
+	chart.div = this.canvas.parentNode;
 	
 	chart.xValues = time;
 	chart.yValues = values;
 	
 	if (opts.title) {
-		title = r.g.text((width+paddingLeft)/2, paddingTop, opts.title);
+		title = this.g.text((width+paddingLeft)/2, paddingTop, opts.title);
 		chart.title = title;
 		chart.push(title);
 	}
