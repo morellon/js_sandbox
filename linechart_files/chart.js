@@ -8,10 +8,10 @@ Date.formatted_time = function (text) {
 }
 
 function drawLegend(x, y, opts) {
-	var lines = opts.chart.lines;
-	var raphael = lines[0].paper;
-	
-	var legend = raphael.set();
+	var chart = opts.chart,
+			lines = opts.chart.lines,
+			raphael = lines[0].paper,
+			legend = raphael.set();
 	
 	if (opts.title) {
 		legend.push(raphael.g.text(x + 15 , y + 15, opts.title).attr({"text-anchor": "start"}));
@@ -39,6 +39,8 @@ function drawLegend(x, y, opts) {
 	}
 	
 	legend.push(raphael.rect(x, y, 300, 15 * (lines.length + 2)));
+	chart.legend = legend;
+	chart.push(legend);
 	
 	return legend;
 }
@@ -52,49 +54,52 @@ function defineChartArea(x, y, opts) {
 	
 	var column = raphael.rect(0, y, 1, height).attr({fill: "#fff", "opacity": 0});
 	var chartArea = raphael.rect(x, y, width, height).attr({fill: "#fff", "opacity": 0});
+	chart.columnX = column;
+	chart.area = chartArea;
+	chart.push(chartArea, column);
+	
 	chartArea.mousemove(function (e) {
-		column.attr({opacity: 0.5, x: e.offsetX || (e.pageX - div.offsetLeft)});
+		column.attr({opacity: 0.5, x: (e.pageX - div.offsetLeft)});
 	});
 	chartArea.mouseout(function () {
 		column.attr({opacity: 0, x: 0});
 	});
 	
-	chartArea.selection = function(f) {
-		var selection;
+	chart.selection = function(f) {
 		chartArea.mousedown(function(e) {
 			e.preventDefault();
 			e.stopPropagation();
-			if (!selection) {
-				selection = this.paper.rect(column.attrs.x, column.attrs.y, column.attrs.width, column.attrs.height).attr({stroke: "#404", fill: "#c0c", opacity: 0.3});
+			if (!this.selection) {
+				this.selection = this.paper.rect(column.attrs.x, column.attrs.y, column.attrs.width, column.attrs.height).attr({stroke: "#404", fill: "#c0c", opacity: 0.3});
 				// if selection rectangle is in front, the events won't work
-				selection.toBack();
+				this.selection.toBack();
 				
-				selection.startValue = function () {
+				this.selection.startValue = function () {
 					var xStep = (chart.xValues[chart.xValues.length - 1] - chart.xValues[0])/width;
-					return ((this.attrs.x-x) * xStep) + chart.xValues[0];
+					return ((this.attrs.x - x) * xStep) + chart.xValues[0];
 				}
-				selection.endValue = function () {
+				this.selection.endValue = function () {
 					var xStep = (chart.xValues[chart.xValues.length - 1] - chart.xValues[0])/width;
-					return ((this.attrs.x-x+this.attrs.width) * xStep) + chart.xValues[0];
+					return ((this.attrs.x - x + this.attrs.width) * xStep) + chart.xValues[0];
 				}
 				
-				selection.start = column.attrs.x;
+				this.selection.start = column.attrs.x;
 			}
-		}).mousemove(function(e) {
-			if (selection) {
-				var width = column.attrs.x - selection.start;
+		}).mousemove(function() {
+			if (this.selection) {
+				var width = column.attrs.x - this.selection.start;
 				if (width >= 0) {
-					selection.attr({x: selection.start, width: width});
+					this.selection.attr({x: this.selection.start, width: width});
 				} else {
-					selection.attr({x: column.attrs.x, width: -width});
+					this.selection.attr({x: column.attrs.x, width: -width});
 				}
 					
 			}
 		}).mouseup(function() {
-			if (selection) {
-				f && f(selection);
-				selection.remove();
-				selection = undefined;
+			if (this.selection) {
+				f && f(this.selection);
+				this.selection.remove();
+				this.selection = undefined;
 			}
 		});
 	}
@@ -185,16 +190,12 @@ function drawChart(holder, opts) {
 		chart.symbols.pop(i);
 	}
 	
-	chart.area = defineChartArea(paddingLeft, paddingTop, {width: width, height: height, chart: chart});
-	chart.push(chart.area);
-	chart.area.selection(function (sel) {console.log(Date.formatted_time(sel.endValue()))});
-
+	defineChartArea(paddingLeft, paddingTop, {width: width, height: height, chart: chart});
 	setSymbolCallbacks(chart, time, values, units);
-	
 	overwriteAxis(chart.axis[0]);
+	drawLegend(15, height + 45, {chart: chart, labels: opts.labels, title: opts.legendTitle});
 	
-	chart.legend = drawLegend(15, height + 45, {chart: chart, labels: opts.labels, title: opts.legendTitle});
-	chart.push(chart.legend);
+	chart.selection(function (sel) {console && console.log(Date.formatted_time(sel.endValue()))});
 	
 	return chart;
 }
